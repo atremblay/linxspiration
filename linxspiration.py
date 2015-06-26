@@ -1,9 +1,8 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Author: alexis
 # @Date:   2015-06-22 17:53:03
-# @Last Modified by:   alexis
-# @Last Modified time: 2015-06-22 19:18:33
+# @Last Modified by:   Alexis Tremblay
+# @Last Modified time: 2015-06-26 09:49:51
 
 from bs4 import BeautifulSoup
 import urllib.request as urllib
@@ -72,7 +71,7 @@ def args():
 
 def create_dirs():
     for tag in tags:
-        path = '/Users/alexis/Pictures/' + tag
+        path = os.path.join(os.path.expanduser('~'), 'Pictures', tag)
         if os.path.exists(path):
             if os.path.isdir(path):
                 continue
@@ -147,7 +146,8 @@ def get_image(tag, link):
     image = path[-1]
 
     logging.info("Fetching {}::{}".format(tag, link))
-    urllib.urlretrieve(link, '/Users/alexis/Pictures/' + tag + '/' + image)
+    image_path = os.path.join(os.path.expanduser('~'), 'Pictures', tag, image)
+    urllib.urlretrieve(link, image_path)
 
     return link
 
