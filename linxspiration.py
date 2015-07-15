@@ -2,7 +2,7 @@
 # @Author: alexis
 # @Date:   2015-06-22 17:53:03
 # @Last Modified by:   Alexis Tremblay
-# @Last Modified time: 2015-06-26 09:49:51
+# @Last Modified time: 2015-06-26 10:35:24
 
 from bs4 import BeautifulSoup
 import urllib.request as urllib
@@ -51,21 +51,23 @@ class ImageLog(object):
 
     def __del__(self):
         now = datetime.datetime.now()
-        log_file = open(self.path,'w')
+        log_file = open(self.path, 'w')
         log = {
             "images": list(self.log),
             "updated": now.strftime("%Y-%m-%d %H:%M")
             }
 
-        json.dump(log,log_file, indent=4)
+        json.dump(log, log_file, indent=4)
         log_file.close()
 
 
 def args():
-    parser = argparse.ArgumentParser(description='Script pour aller chercher'
+    parser = argparse.ArgumentParser(
+        description='Script pour aller chercher'
         ' les images disponibles sur linxspiration')
-    parser.add_argument('-l', '--log', metavar='N', default='INFO',
-                       help='Niveau de logging')
+    parser.add_argument(
+        '-l', '--log', metavar='N', default='INFO',
+        help='Niveau de logging')
     return parser.parse_args()
 
 
@@ -103,7 +105,7 @@ def get_main_links(tag):
         with (yield from sem):
             source = yield from get_source(url)
         soup = BeautifulSoup(source)
-        divs = soup.find_all('div', {'class':'media'})
+        divs = soup.find_all('div', {'class': 'media'})
 
         for div in divs:
             try:
@@ -127,7 +129,7 @@ def get_secondary_links(tag, links):
         with (yield from sem):
             source = yield from get_source(link)
         soup = BeautifulSoup(source)
-        divs = soup.find_all('div', {'class':'media'})
+        divs = soup.find_all('div', {'class': 'media'})
 
         for div in divs:
             try:
@@ -151,6 +153,7 @@ def get_image(tag, link):
 
     return link
 
+
 @asyncio.coroutine
 def main():
     create_dirs()
@@ -162,12 +165,12 @@ def main():
     futures = []
 
     for main_future in asyncio.as_completed(
-        [get_main_links(tag) for tag in tags]):
+            [get_main_links(tag) for tag in tags]):
 
         tag, main_links = yield from main_future
 
         for second_future in asyncio.as_completed(
-            [get_secondary_links(tag, main_links)]):
+                [get_secondary_links(tag, main_links)]):
 
             tag, second_links = yield from second_future
             logging.debug("({}, {})".format(tag, second_links))
@@ -186,7 +189,6 @@ def main():
             image_log.add(future.result())
 
 
-
 if __name__ == '__main__':
     args = args()
     level = getattr(logging, args.log.upper(), None)
@@ -196,4 +198,3 @@ if __name__ == '__main__':
     logging.basicConfig(level=level, format='%(levelname)s:: %(message)s')
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-
