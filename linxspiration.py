@@ -1,8 +1,9 @@
+#! /Users/alexis/anaconda/bin/python
 # -*- coding: utf-8 -*-
 # @Author: alexis
 # @Date:   2015-06-22 17:53:03
-# @Last Modified by:   Alexis Tremblay
-# @Last Modified time: 2015-06-26 10:35:24
+# @Last Modified by:   alexis
+# @Last Modified time: 2015-09-19 14:26:15
 
 from bs4 import BeautifulSoup
 import urllib.request as urllib
@@ -33,7 +34,7 @@ class ImageLog(object):
     def __init__(self):
         super(ImageLog, self).__init__()
         home_dir = os.path.expanduser('~')
-        log_path = 'Pictures/linxspiration.log'
+        log_path = 'Pictures/linxspiration/linxspiration.log'
         self.path = os.path.join(home_dir, log_path)
 
         self.log = set()
@@ -49,7 +50,7 @@ class ImageLog(object):
     def has(self, image):
         return image in self.log
 
-    def __del__(self):
+    def save(self):
         now = datetime.datetime.now()
         log_file = open(self.path, 'w')
         log = {
@@ -73,7 +74,7 @@ def args():
 
 def create_dirs():
     for tag in tags:
-        path = os.path.join(os.path.expanduser('~'), 'Pictures', tag)
+        path = os.path.join(os.path.expanduser('~'), 'Pictures/linxspiration', tag)
         if os.path.exists(path):
             if os.path.isdir(path):
                 continue
@@ -96,7 +97,7 @@ def get_main_links(tag):
     page = 1
     images_urls = []
 
-    while page < 15:
+    while page < 20:
         logging.debug("  Page %s", page)
         url = base_url + tag + '/page/' + str(page)
         logging.debug("  url: {}".format(url))
@@ -148,7 +149,7 @@ def get_image(tag, link):
     image = path[-1]
 
     logging.info("Fetching {}::{}".format(tag, link))
-    image_path = os.path.join(os.path.expanduser('~'), 'Pictures', tag, image)
+    image_path = os.path.join(os.path.expanduser('~'), 'Pictures/linxspiration', tag, image)
     urllib.urlretrieve(link, image_path)
 
     return link
@@ -184,10 +185,12 @@ def main():
 
     for future in concurrent.futures.as_completed(futures):
         if future.exception() is not None:
-            logging.info("Could not fetch ", link)
+            logging.info("Could not fetch ")
         else:
+            logging.info("Fetched {}".format(future.result()))
             image_log.add(future.result())
 
+    image_log.save()
 
 if __name__ == '__main__':
     args = args()
